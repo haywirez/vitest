@@ -108,6 +108,26 @@ npx vitest --browser.name=chrome --browser.headless
 
 In this case, Vitest will run in headless mode using the Chrome browser.
 
+## WebdriverIO Capabilities
+
+If using [WebdriverIO](https://webdriver.io/) (default), you may pass [custom capabilities](https://webdriver.io/docs/capabilities#custom-capabilities) as:
+
+```ts
+export default defineConfig({
+  test: {
+    browser: {
+      enabled: true,
+      headless: true,
+    },
+    capabilities: {
+      'goog:chromeOptions': {
+        args: ['disable-gpu'],
+      },
+    },
+  },
+})
+```
+
 ## Limitations
 ### Thread Blocking Dialogs
 
