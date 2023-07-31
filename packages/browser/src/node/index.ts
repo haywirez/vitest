@@ -7,14 +7,19 @@ import sirv from 'sirv'
 import type { Plugin } from 'vite'
 import { injectVitestModule } from './esmInjector'
 
-const polyfills = [
-  'util',
-]
+const polyfills = ['util']
 
 // don't expose type to not bundle it here
 export default (project: any, base = '/'): Plugin[] => {
   const pkgRoot = resolve(fileURLToPath(import.meta.url), '../..')
   const distRoot = resolve(pkgRoot, 'dist')
+
+  function crossOriginIsolationMiddleware(_req: any, response: any, next: any) {
+    response.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
+    response.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
+    response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+    next()
+  }
 
   return [
     {
@@ -33,6 +38,7 @@ export default (project: any, base = '/'): Plugin[] => {
             dev: true,
           }),
         )
+        server.middlewares.use(crossOriginIsolationMiddleware)
       },
     },
     {
@@ -63,7 +69,11 @@ export default (project: any, base = '/'): Plugin[] => {
         }
       },
       async resolveId(id) {
-        if (!builtinModules.includes(id) && !polyfills.includes(id) && !id.startsWith('node:')) {
+        if (
+          !builtinModules.includes(id)
+          && !polyfills.includes(id)
+          && !id.startsWith('node:')
+        ) {
           if (!/\?browserv=\w+$/.test(id))
             return
 
